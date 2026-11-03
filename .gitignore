@@ -1,0 +1,16 @@
+# Python кэш
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальные окружения
+venv/
+.venv/
+env/
+
+# Секреты
+.env
+
+# Локальные файлы и база
+uploads/
+studecase.db
