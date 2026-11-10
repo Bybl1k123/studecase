@@ -1,30 +1,33 @@
-"""Экран 1: Дерево папок."""
+"""Экран 1: Корневые папки."""
 import flet as ft
 from app import theme as T
 from app.demo_data import DEMO_TREE
-from app.widgets.appbar import appbar
+from app.widgets.cards import empty_state
 
-def show_folders(page: ft.Page, on_open_folder, on_search, on_review, file_picker):
-    def folder_row(node: dict, depth: int = 0) -> list:
-        controls = [
+def show_folders(page: ft.Page, on_open_folder, on_delete_folder, on_search, on_review, on_create_folder, file_picker):
+    rows = []
+    for node in DEMO_TREE:
+        rows.extend([
             ft.Container(
                 content=ft.Row([
                     ft.Icon(ft.Icons.FOLDER, color=T.FOLDER_COLOR, size=22),
-                    ft.Text(node["name"], size=T.FS_BODY, color=T.TEXT_PRIMARY),
+                    ft.Text(node["name"], size=T.FS_BODY, color=T.TEXT_PRIMARY, expand=True),
+                    ft.IconButton(
+                        icon=ft.Icons.DELETE_OUTLINE,
+                        icon_color=T.TEXT_HINT,
+                        icon_size=20,
+                        tooltip="Удалить папку",
+                        on_click=lambda e, n=node: on_delete_folder(n),
+                    ),
                 ], spacing=T.PAD_ROW),
-                padding=ft.Padding.only(left=T.PAD_SCREEN + depth * 20, right=T.PAD_SCREEN, top=12, bottom=12),
+                padding=ft.Padding.only(left=T.PAD_SCREEN, right=T.PAD_SCREEN, top=8, bottom=8),
                 on_click=lambda e, n=node: on_open_folder(n),
                 ink=True,
             ),
             ft.Divider(height=1, color=T.DIVIDER, thickness=0.5),
-        ]
-        for child in node.get("children", []):
-            controls.extend(folder_row(child, depth + 1))
-        return controls
+        ])
 
-    rows = []
-    for node in DEMO_TREE:
-        rows.extend(folder_row(node))
+    content = ft.Column(rows, spacing=0, scroll=ft.ScrollMode.AUTO) if rows else empty_state(ft.Icons.FOLDER_OPEN, "Папок пока нет")
 
     view = ft.View(
         route="/",
@@ -36,7 +39,12 @@ def show_folders(page: ft.Page, on_open_folder, on_search, on_review, file_picke
                 actions=[
                     ft.IconButton(ft.Icons.SEARCH, icon_color=T.TEXT_ON_PRIMARY, tooltip="Поиск", on_click=lambda e: on_search()),
                     ft.IconButton(ft.Icons.SCHOOL, icon_color=T.TEXT_ON_PRIMARY, tooltip="Повторение", on_click=lambda e: on_review()),
-                    # ИСПОЛЬЗУЕМ ACTION ДЛЯ ФАЙЛОВ
+                    ft.IconButton(
+                        ft.Icons.CREATE_NEW_FOLDER,
+                        icon_color=T.TEXT_ON_PRIMARY,
+                        tooltip="Создать папку",
+                        on_click=lambda e: on_create_folder(),
+                    ),
                     ft.IconButton(
                         ft.Icons.ADD, 
                         icon_color=T.TEXT_ON_PRIMARY, 
@@ -46,7 +54,7 @@ def show_folders(page: ft.Page, on_open_folder, on_search, on_review, file_picke
                 ],
             ),
             ft.Container(
-                content=ft.Column(rows, spacing=0, scroll=ft.ScrollMode.AUTO),
+                content=content,
                 expand=True,
                 padding=ft.Padding.only(top=T.GAP),
             ),
